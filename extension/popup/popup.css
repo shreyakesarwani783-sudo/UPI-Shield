@@ -136,3 +136,142 @@ h1 {
 .report-btn:hover {
   background: rgba(255, 71, 87, 0.15);
 }
+/* ===== Header with logo ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #2ed573, #26b862);
+  border-radius: 8px;
+  color: #0d2e24;
+  box-shadow: 0 3px 10px rgba(46, 213, 115, 0.35);
+  animation: logoFloat 3.5s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.header h1 {
+  margin-bottom: 0;
+}
+
+/* ===== Entrance animation ===== */
+.container > * {
+  animation: fadeSlideIn 0.35s ease both;
+}
+
+.container > *:nth-child(2) { animation-delay: 0.04s; }
+.container > *:nth-child(3) { animation-delay: 0.08s; }
+.container > *:nth-child(4) { animation-delay: 0.12s; }
+.container > *:nth-child(5) { animation-delay: 0.16s; }
+.container > *:nth-child(6) { animation-delay: 0.2s; }
+.container > *:nth-child(7) { animation-delay: 0.24s; }
+.container > *:nth-child(8) { animation-delay: 0.28s; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Result box polish ===== */
+.result-box {
+  transition: transform 0.2s ease;
+}
+
+.result-icon svg {
+  display: block;
+}
+
+.result-icon.spin svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Report button icon spacing ===== */
+.report-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.report-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Footer status ===== */
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+  font-size: 10.5px;
+  color: #6edcb4;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #747d8c;
+  transition: background 0.3s ease;
+}
+
+.status-dot.online {
+  background: #2ed573;
+  box-shadow: 0 0 5px #2ed573;
+  animation: statusBlink 1.8s ease-in-out infinite;
+}
+
+.status-dot.offline {
+  background: #ff4757;
+  box-shadow: 0 0 5px #ff4757;
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+/* ===== Language toggle ===== */
+.header {
+  position: relative;
+}
+
+.lang-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(110, 220, 180, 0.1);
+  border: 1px solid rgba(110, 220, 180, 0.35);
+  color: #6edcb4;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-toggle:hover {
+  background: rgba(110, 220, 180, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}

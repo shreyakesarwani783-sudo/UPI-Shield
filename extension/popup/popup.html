@@ -7,26 +7,47 @@
   </head>
   <body>
     <div class="container">
-      <h1>🛡️ UPI Shield</h1>
-      <p class="label">Current Site:</p>
+      <div class="header">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h1 id="appTitle">UPI Shield</h1>
+        <button class="lang-toggle" id="langToggle" title="Switch language">EN / हिं</button>
+      </div>
+
+      <p class="label" id="lblCurrentSite">Current Site</p>
       <p class="url-display" id="currentUrl">Loading...</p>
 
       <div class="result-box unknown" id="resultBox">
-        <span class="result-icon" id="resultIcon">⏳</span>
+        <span class="result-icon" id="resultIcon"></span>
         <span class="result-text" id="resultText">Scanning...</span>
       </div>
 
       <p class="reason" id="resultReason"></p>
 
       <div class="api-box" id="apiBox" style="display:none;">
-        <p class="api-label">Risk Analysis:</p>
+        <p class="api-label" id="lblRiskAnalysis">Risk Analysis</p>
         <p class="api-score" id="apiScore"></p>
       </div>
 
       <p class="explanation" id="explanation" style="display:none;"></p>
 
-      <button class="report-btn" id="reportBtn">🚩 Report this site</button>
+      <button class="report-btn" id="reportBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+          <line x1="4" y1="22" x2="4" y2="15"/>
+        </svg>
+        <span id="reportBtnText">Report this site</span>
+      </button>
+
+      <div class="footer-status">
+        <span class="status-dot"></span>
+        <span id="backendStatus">Checking backend...</span>
+      </div>
     </div>
+    <script src="../utils/i18n.js"></script>
     <script src="../local-engine/allowlistCache.js"></script>
     <script src="../local-engine/typosquatCheck.js"></script>
     <script src="../utils/apiClient.js"></script>
