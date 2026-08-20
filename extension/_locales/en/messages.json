@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "UPI Shield - Phishing Detector"
+  },
+  "appDescription": {
+    "message": "Detects fake UPI/banking phishing sites."
+  }
+}

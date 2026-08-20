@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "UPI Shield - Phishing Detector",
+  "version": "0.1.0",
+  "default_locale": "en",
+  "description": "Detects fake UPI/banking phishing sites.",
+
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "https://*/*"
+  ],
+
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+
+ "content_scripts": [
+  {
+    "matches": ["http://*/*", "https://*/*", "file:///*"],
+    "js": [
+      "content-scripts/page-scanner.js",
+      "content-scripts/inject-warning.js"
+    ],
+    "run_at": "document_idle"
+  }
+],
+
+  "options_page": "options/options.html"
+}

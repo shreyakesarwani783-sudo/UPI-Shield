@@ -1,0 +1,25 @@
+// Trusted UPI/Banking domains allowlist
+const TRUSTED_DOMAINS = [
+  "sbi.co.in",
+  "onlinesbi.sbi",
+  "paytm.com",
+  "phonepe.com",
+  "googlepay.com",
+  "npci.org.in",
+  "bhimupi.org.in",
+  "yesbank.in",
+  "hdfcbank.com",
+  "icicibank.com",
+  "axisbank.com",
+  "kotak.com",
+  "pnbindia.in",
+  "unionbankofindia.co.in",
+  "bankofbaroda.in",
+  "canarabank.com",
+  "amazon.in",
+  "flipkart.com",
+  "mobikwik.com",
+  "freecharge.in",
+  "airtel.in",
+  "jio.com"
+];
