@@ -1,5 +1,9 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { scanUrl } from "../api/dashboardClient";
+import {
+  ShieldAlert, Search, Loader2, CheckCircle2, XCircle, Lightbulb
+} from "lucide-react";
 
 const SAMPLE_DATA = [
   { url: "https://paytrn.com", score: 75, level: "Critical", date: "2026-08-20" },
@@ -9,6 +13,14 @@ const SAMPLE_DATA = [
   { url: "https://paytm-kyc-update.in", score: 80, level: "Critical", date: "2026-08-18" },
 ];
 
+const rowVariants = {
+  hidden: { opacity: 0, x: -8 },
+  visible: (i) => ({
+    opacity: 1, x: 0,
+    transition: { delay: i * 0.06, duration: 0.35, ease: "easeOut" }
+  })
+};
+
 export default function FlaggedDomains() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState(null);
@@ -17,6 +29,7 @@ export default function FlaggedDomains() {
   const handleScan = async () => {
     if (!url) return;
     setLoading(true);
+    setResult(null);
     try {
       const res = await scanUrl(url);
       setResult(res.data);
@@ -26,60 +39,90 @@ export default function FlaggedDomains() {
     setLoading(false);
   };
 
+  const isSafe = result?.level === "Safe";
+
   return (
     <div>
-      <div className="page-header">
-        <h1>🚨 Flagged Domains</h1>
+      <motion.div
+        className="page-header"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1><ShieldAlert size={22} strokeWidth={2.2} /> Flagged Domains</h1>
         <p>Known phishing and suspicious sites</p>
-      </div>
+      </motion.div>
 
       {/* Live Scanner */}
-      <div className="chart-container" style={{marginBottom: "24px"}}>
-        <h3>🔍 Live URL Scanner</h3>
-        <div style={{display: "flex", gap: "12px", marginBottom: "16px"}}>
+      <motion.div
+        className="chart-container"
+        style={{ marginBottom: "24px" }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Search size={16} strokeWidth={2.2} /> Live URL Scanner
+        </h3>
+        <div className="scanner-row">
           <input
             value={url}
             onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleScan()}
             placeholder="Enter URL to scan..."
-            style={{
-              flex: 1, padding: "10px 14px", background: "#0a1a14",
-              border: "1px solid rgba(110,220,180,0.3)", borderRadius: "8px",
-              color: "#fff", fontSize: "13px"
-            }}
+            className="scanner-input"
           />
-          <button onClick={handleScan} disabled={loading} style={{
-            padding: "10px 24px", background: "#6edcb4", color: "#0a1a14",
-            border: "none", borderRadius: "8px", fontWeight: "700",
-            cursor: "pointer", fontSize: "13px"
-          }}>
-            {loading ? "Scanning..." : "Scan"}
+          <button onClick={handleScan} disabled={loading} className="scan-btn">
+            {loading ? (
+              <>
+                <Loader2 size={15} className="spin-icon" /> Scanning...
+              </>
+            ) : (
+              <>
+                <Search size={15} /> Scan
+              </>
+            )}
           </button>
         </div>
 
-        {result && (
-          <div style={{
-            background: "#0a1a14", borderRadius: "8px", padding: "16px",
-            border: `1px solid ${result.level === "Safe" ? "#2ed573" : "#ff4757"}`
-          }}>
-            <p style={{color: "#6edcb4", marginBottom: "8px"}}>
-              <strong>Level:</strong> {result.level} |
-              <strong> Score:</strong> {result.risk_score}/100 |
-              <strong> Confidence:</strong> {Math.round(result.confidence * 100)}%
-            </p>
-            {result.reasons.map((r, i) => (
-              <p key={i} style={{fontSize: "12px", color: "#a0c8b0"}}>• {r}</p>
-            ))}
-            {result.explanation && (
-              <p style={{marginTop: "10px", color: "#ffe066", fontSize: "12px"}}>
-                💡 {result.explanation}
+        <AnimatePresence>
+          {result && (
+            <motion.div
+              className="scan-result"
+              style={{ borderColor: isSafe ? "var(--green)" : "var(--red)" }}
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <p className="scan-result-head">
+                {isSafe
+                  ? <CheckCircle2 size={16} color="var(--green)" />
+                  : <XCircle size={16} color="var(--red)" />}
+                <strong>{result.level}</strong>
+                <span className="dim">Score: {result.risk_score}/100</span>
+                <span className="dim">Confidence: {Math.round(result.confidence * 100)}%</span>
               </p>
-            )}
-          </div>
-        )}
-      </div>
+              {result.reasons.map((r, i) => (
+                <p key={i} className="scan-reason">• {r}</p>
+              ))}
+              {result.explanation && (
+                <p className="scan-explanation">
+                  <Lightbulb size={13} /> {result.explanation}
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Table */}
-      <div className="table-container">
+      <motion.div
+        className="table-container"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+      >
         <table>
           <thead>
             <tr>
@@ -91,7 +134,13 @@ export default function FlaggedDomains() {
           </thead>
           <tbody>
             {SAMPLE_DATA.map((row, i) => (
-              <tr key={i}>
+              <motion.tr
+                key={i}
+                custom={i}
+                variants={rowVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 <td style={{color: "#fff", fontFamily: "monospace"}}>{row.url}</td>
                 <td>{row.score}/100</td>
                 <td>
@@ -100,11 +149,11 @@ export default function FlaggedDomains() {
                   </span>
                 </td>
                 <td>{row.date}</td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </motion.div>
     </div>
   );
 }

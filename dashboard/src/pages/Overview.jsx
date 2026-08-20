@@ -1,11 +1,46 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getStats } from "../api/dashboardClient";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from "recharts";
+import {
+  LayoutDashboard, ScanLine, ShieldAlert, ShieldCheck,
+  MessageSquareWarning, BrainCircuit
+} from "lucide-react";
 
 const COLORS = ["#2ed573", "#ff4757", "#ffc800", "#ff7f50"];
+
+// Animated count-up number
+function CountUp({ value, decimals = 0 }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    const target = Number(value) || 0;
+    const duration = 900;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(target * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [value]);
+
+  return <>{decimals ? display.toFixed(decimals) : Math.round(display).toLocaleString()}</>;
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" }
+  })
+};
 
 export default function Overview() {
   const [stats, setStats] = useState(null);
@@ -14,7 +49,14 @@ export default function Overview() {
     getStats().then(res => setStats(res.data)).catch(console.error);
   }, []);
 
-  if (!stats) return <div style={{color: "#6edcb4"}}>Loading...</div>;
+  if (!stats) {
+    return (
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <span>Loading dashboard...</span>
+      </div>
+    );
+  }
 
   const pieData = [
     { name: "Safe", value: stats.safe },
@@ -28,45 +70,58 @@ export default function Overview() {
     { name: "Reports", value: stats.reports },
   ];
 
+  const cards = [
+    { icon: ScanLine, label: "Total Scans", value: stats.total_scans, sub: "All time", color: "var(--green)" },
+    { icon: ShieldAlert, label: "Flagged Sites", value: stats.flagged, sub: "Phishing detected", color: "var(--red)" },
+    { icon: ShieldCheck, label: "Safe Sites", value: stats.safe, sub: "Verified safe", color: "var(--green)" },
+    { icon: MessageSquareWarning, label: "User Reports", value: stats.reports, sub: "Community reports", color: "var(--yellow)" },
+    { icon: BrainCircuit, label: "ML Accuracy", value: stats.accuracy, sub: `${stats.dataset_size?.toLocaleString()} URLs trained`, color: "var(--green)", suffix: "%" },
+  ];
+
   return (
     <div>
-      <div className="page-header">
-        <h1>📊 Overview</h1>
+      <motion.div
+        className="page-header"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1><LayoutDashboard size={22} strokeWidth={2.2} /> Overview</h1>
         <p>Real-time UPI Shield statistics</p>
-      </div>
+      </motion.div>
 
       {/* Stat Cards */}
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="label">Total Scans</div>
-          <div className="value">{stats.total_scans}</div>
-          <div className="sub">All time</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">Flagged Sites</div>
-          <div className="value" style={{color: "#ff4757"}}>{stats.flagged}</div>
-          <div className="sub">Phishing detected</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">Safe Sites</div>
-          <div className="value" style={{color: "#2ed573"}}>{stats.safe}</div>
-          <div className="sub">Verified safe</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">User Reports</div>
-          <div className="value" style={{color: "#ffc800"}}>{stats.reports}</div>
-          <div className="sub">Community reports</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">ML Accuracy</div>
-          <div className="value">{stats.accuracy}%</div>
-          <div className="sub">{stats.dataset_size?.toLocaleString()} URLs trained</div>
-        </div>
+        {cards.map((c, i) => (
+          <motion.div
+            className="stat-card"
+            key={c.label}
+            custom={i}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          >
+            <div className="stat-card-icon" style={{ color: c.color }}>
+              <c.icon size={20} strokeWidth={2} />
+            </div>
+            <div className="label">{c.label}</div>
+            <div className="value" style={{ color: c.color }}>
+              <CountUp value={c.value} />{c.suffix || ""}
+            </div>
+            <div className="sub">{c.sub}</div>
+          </motion.div>
+        ))}
       </div>
 
       {/* Charts */}
       <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px"}}>
-        <div className="chart-container">
+        <motion.div
+          className="chart-container"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.45 }}
+        >
           <h3>Safe vs Flagged</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -77,9 +132,14 @@ export default function Overview() {
               <Tooltip contentStyle={{background: "#0d2e24", border: "1px solid #6edcb4", borderRadius: "8px"}} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
 
-        <div className="chart-container">
+        <motion.div
+          className="chart-container"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.48, duration: 0.45 }}
+        >
           <h3>Scan Summary</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={barData}>
@@ -90,7 +150,7 @@ export default function Overview() {
               <Bar dataKey="value" fill="#6edcb4" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
