@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from services.risk_engine import compute_risk
 from services.xai_service import get_explanation
+from services.history_service import save_scan
 
 router = APIRouter()
 
@@ -26,6 +27,16 @@ def scan_url(request: ScanRequest):
         url=request.url,
         reasons=result["reasons"],
         risk_level=result["level"]
+    )
+
+    # Step 3: Save to history
+    save_scan(
+        url=request.url,
+        risk_score=result["risk_score"],
+        level=result["level"],
+        confidence=result["confidence"],
+        reasons=result["reasons"],
+        explanation=explanation
     )
 
     return ScanResponse(

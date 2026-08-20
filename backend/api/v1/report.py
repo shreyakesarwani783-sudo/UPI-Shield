@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from services.history_service import save_report
 
 router = APIRouter()
 
@@ -9,6 +10,5 @@ class ReportRequest(BaseModel):
 
 @router.post("/report")
 def report_url(request: ReportRequest):
-    # Phase 4 — just acknowledge, storage Phase 5 mein
-    print(f"[REPORT] URL reported: {request.url}")
+    save_report(url=request.url, reason=request.reason)
     return {"message": "Report received. Thank you!", "url": request.url}

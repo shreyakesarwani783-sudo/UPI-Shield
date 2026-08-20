@@ -1,11 +1,7 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FileText, CheckCircle2, Eye, Clock } from "lucide-react";
-
-const REPORTS = [
-  { url: "https://sbi-kyc-verify.com", reason: "Fake SBI page asking for OTP", date: "2026-08-20", status: "Pending" },
-  { url: "https://phonepe-reward.net", reason: "Fake reward claiming UPI details", date: "2026-08-19", status: "Reviewed" },
-  { url: "https://paytm-cashback.in", reason: "Cashback scam page", date: "2026-08-18", status: "Confirmed" },
-];
+import { getReports } from "../api/dashboardClient";
 
 const statusIcon = {
   Confirmed: CheckCircle2,
@@ -22,6 +18,12 @@ const rowVariants = {
 };
 
 export default function UserReports() {
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    getReports().then(res => setReports(res.data)).catch(console.error);
+  }, []);
+
   return (
     <div>
       <motion.div
@@ -50,31 +52,35 @@ export default function UserReports() {
             </tr>
           </thead>
           <tbody>
-            {REPORTS.map((r, i) => {
-              const StatusIcon = statusIcon[r.status] || Clock;
-              return (
-                <motion.tr
-                  key={i}
-                  custom={i}
-                  variants={rowVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <td style={{color: "#fff", fontFamily: "monospace", fontSize: "12px"}}>{r.url}</td>
-                  <td>{r.reason}</td>
-                  <td>{r.date}</td>
-                  <td>
-                    <span className={`badge ${
-                      r.status === "Confirmed" ? "critical" :
-                      r.status === "Reviewed" ? "warning" : "caution"
-                    }`}>
-                      <StatusIcon size={12} strokeWidth={2.4} style={{ marginRight: "4px", verticalAlign: "-2px" }} />
-                      {r.status}
-                    </span>
-                  </td>
-                </motion.tr>
-              );
-            })}
+            {reports.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px" }}>No reports yet</td></tr>
+            ) : (
+              reports.map((r, i) => {
+                const StatusIcon = statusIcon[r.status] || Clock;
+                return (
+                  <motion.tr
+                    key={i}
+                    custom={i}
+                    variants={rowVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <td style={{color: "#fff", fontFamily: "monospace", fontSize: "12px"}}>{r.url}</td>
+                    <td>{r.reason}</td>
+                    <td>{r.date}</td>
+                    <td>
+                      <span className={`badge ${
+                        r.status === "Confirmed" ? "critical" :
+                        r.status === "Reviewed" ? "warning" : "caution"
+                      }`}>
+                        <StatusIcon size={12} strokeWidth={2.4} style={{ marginRight: "4px", verticalAlign: "-2px" }} />
+                        {r.status}
+                      </span>
+                    </td>
+                  </motion.tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </motion.div>

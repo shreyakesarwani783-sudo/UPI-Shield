@@ -10,11 +10,34 @@ const LEVEL_COLORS = {
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
 
+// URLs that should never be auto-scanned (dev/local/system)
+function shouldSkipScan(url) {
+  if (!url) return true;
+  if (url.startsWith("chrome://")) return true;
+  if (url.startsWith("chrome-extension://")) return true;
+  if (url.startsWith("about:")) return true;
+  if (url.startsWith("edge://")) return true;
+
+  try {
+    const u = new URL(url);
+    const host = u.hostname;
+
+    // Skip localhost / dev servers / private IPs
+    if (host === "localhost" || host === "127.0.0.1") return true;
+    if (/^192\.168\.\d+\.\d+$/.test(host)) return true;
+    if (/^10\.\d+\.\d+\.\d+$/.test(host)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+$/.test(host)) return true;
+
+    return false;
+  } catch (e) {
+    return true;
+  }
+}
+
 // Scan URL and update badge
 async function scanAndUpdateBadge(tabId, url) {
-  // Skip chrome:// and extension pages
-if (!url || url.startsWith("chrome://") || url.startsWith("chrome-extension://") || url.startsWith("about:")) 
-  {    chrome.action.setBadgeText({ text: "", tabId });
+  if (shouldSkipScan(url)) {
+    chrome.action.setBadgeText({ text: "", tabId });
     return;
   }
 
@@ -71,6 +94,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     scanAndUpdateBadge(activeInfo.tabId, tab.url);
   }
 });
+
 // Safe redirect handler
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "REDIRECT_SAFE") {

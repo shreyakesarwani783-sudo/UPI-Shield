@@ -43,7 +43,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function (tabs) {
   const statusDot     = document.querySelector(".status-dot");
   const backendStatus = document.getElementById("backendStatus");
 
-  if (!url || url.startsWith("chrome://")) {
+  const isLocalDev = url && (
+  url.includes("localhost") ||
+  url.includes("127.0.0.1") ||
+  /^https?:\/\/192\.168\./.test(url) ||
+  /^https?:\/\/10\./.test(url)
+);
+
+if (!url || url.startsWith("chrome://") || isLocalDev) {
     urlDisplay.textContent = t("systemPage", currentLang);
     resultIcon.innerHTML = ICONS.unknown;
     resultText.textContent = t("notApplicable", currentLang);

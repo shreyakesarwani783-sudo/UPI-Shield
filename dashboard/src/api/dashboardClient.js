@@ -7,3 +7,5 @@ const API = axios.create({
 export const getStats = () => API.get("/stats");
 export const scanUrl = (url) => API.post("/scan", { url });
 export const reportUrl = (url, reason) => API.post("/report", { url, reason });
+export const getFlagged = () => API.get("/flagged");
+export const getReports = () => API.get("/reports");

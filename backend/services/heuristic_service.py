@@ -2,14 +2,14 @@ from services.feature_extraction import extract_features
 
 # Expanded trusted domains list
 TRUSTED_DOMAINS = [
-    "sbi.co.in", "onlinesbi.sbi", "paytm.com", "phonepe.com",
+    "sbi.co.in", "sbi.bank.in", "onlinesbi.sbi", "paytm.com", "phonepe.com",
     "googlepay.com", "npci.org.in", "bhimupi.org.in", "yesbank.in",
     "hdfcbank.com", "icicibank.com", "axisbank.com", "kotak.com",
     "pnbindia.in", "unionbankofindia.co.in", "bankofbaroda.in",
     "canarabank.com", "amazon.in", "flipkart.com", "mobikwik.com",
     "freecharge.in", "airtel.in", "jio.com", "indusind.com",
     "federalbank.co.in", "idfcfirstbank.com", "rblbank.com",
-    "google.com", "youtube.com", "gmail.com", "hdfc.bank.in", "icci.bank.in",     
+    "google.com", "youtube.com", "gmail.com", "hdfc.bank.in", "sbi.bank.in", "icici.bank.in", "axis.bank.in",
 ]
 
 def levenshtein(a: str, b: str) -> int:
@@ -41,10 +41,14 @@ def heuristic_score(url: str) -> dict:
             "is_trusted": True
         }
 
-    # Typosquat check
+       # Typosquat check
     closest = min(TRUSTED_DOMAINS, key=lambda d: levenshtein(full_domain, d))
     dist = levenshtein(full_domain, closest)
-    if 1 <= dist <= 3:
+    max_len = max(len(full_domain), len(closest))
+    relative_dist = dist / max_len if max_len > 0 else 1
+
+    # Only flag if edit distance is small AND relatively significant (avoids short-domain false positives)
+    if 1 <= dist <= 2 and relative_dist <= 0.2:
         score += 75
         reasons.append(f"Looks like '{closest}' (typosquat suspected, distance={dist})")
 

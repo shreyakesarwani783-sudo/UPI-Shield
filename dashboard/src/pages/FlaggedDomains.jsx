@@ -1,17 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { scanUrl } from "../api/dashboardClient";
+import { scanUrl, getFlagged } from "../api/dashboardClient";
 import {
   ShieldAlert, Search, Loader2, CheckCircle2, XCircle, Lightbulb
 } from "lucide-react";
-
-const SAMPLE_DATA = [
-  { url: "https://paytrn.com", score: 75, level: "Critical", date: "2026-08-20" },
-  { url: "https://sbi-secure-login.com", score: 88, level: "Critical", date: "2026-08-20" },
-  { url: "https://phonepe-verify.net", score: 72, level: "Warning", date: "2026-08-19" },
-  { url: "https://hdfc-bank-update.com", score: 65, level: "Warning", date: "2026-08-19" },
-  { url: "https://paytm-kyc-update.in", score: 80, level: "Critical", date: "2026-08-18" },
-];
 
 const rowVariants = {
   hidden: { opacity: 0, x: -8 },
@@ -25,6 +17,11 @@ export default function FlaggedDomains() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [flaggedData, setFlaggedData] = useState([]);
+
+  useEffect(() => {
+    getFlagged().then(res => setFlaggedData(res.data)).catch(console.error);
+  }, []);
 
   const handleScan = async () => {
     if (!url) return;
@@ -33,6 +30,9 @@ export default function FlaggedDomains() {
     try {
       const res = await scanUrl(url);
       setResult(res.data);
+      // Refresh table after new scan
+      const updated = await getFlagged();
+      setFlaggedData(updated.data);
     } catch (e) {
       console.error(e);
     }
@@ -53,7 +53,6 @@ export default function FlaggedDomains() {
         <p>Known phishing and suspicious sites</p>
       </motion.div>
 
-      {/* Live Scanner */}
       <motion.div
         className="chart-container"
         style={{ marginBottom: "24px" }}
@@ -116,7 +115,6 @@ export default function FlaggedDomains() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Table */}
       <motion.div
         className="table-container"
         initial={{ opacity: 0, y: 12 }}
@@ -133,24 +131,28 @@ export default function FlaggedDomains() {
             </tr>
           </thead>
           <tbody>
-            {SAMPLE_DATA.map((row, i) => (
-              <motion.tr
-                key={i}
-                custom={i}
-                variants={rowVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <td style={{color: "#fff", fontFamily: "monospace"}}>{row.url}</td>
-                <td>{row.score}/100</td>
-                <td>
-                  <span className={`badge ${row.level.toLowerCase()}`}>
-                    {row.level}
-                  </span>
-                </td>
-                <td>{row.date}</td>
-              </motion.tr>
-            ))}
+            {flaggedData.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px" }}>No flagged sites yet</td></tr>
+            ) : (
+              flaggedData.map((row, i) => (
+                <motion.tr
+                  key={i}
+                  custom={i}
+                  variants={rowVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <td style={{color: "#fff", fontFamily: "monospace"}}>{row.url}</td>
+                  <td>{row.score}/100</td>
+                  <td>
+                    <span className={`badge ${row.level.toLowerCase()}`}>
+                      {row.level}
+                    </span>
+                  </td>
+                  <td>{row.date}</td>
+                </motion.tr>
+              ))
+            )}
           </tbody>
         </table>
       </motion.div>
