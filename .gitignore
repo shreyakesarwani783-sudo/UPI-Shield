@@ -20,3 +20,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+backend/ml/dataset/
+backend/ml/model.pkl
+*.pkl

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { getStats } from "../api/dashboardClient";
 import {
   BrainCircuit, Target, Crosshair, Gauge, Database,
   CheckCircle2, XCircle, AlertTriangle, Layers
@@ -34,26 +35,27 @@ const cardVariants = {
 };
 
 export default function ModelStats() {
-  const stats = {
-    accuracy: 85.39,
-    precision: 88.43,
-    recall: 56.04,
-    f1: 69.0,
-    dataset: 549346,
-    trainSplit: 439476,
-    testSplit: 109870,
-    tp: 17533,
-    tn: 76290,
-    fp: 2295,
-    fn: 13752,
-  };
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getStats().then(res => setStats(res.data)).catch(console.error);
+  }, []);
+
+  if (!stats) {
+    return (
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <span>Loading model stats...</span>
+      </div>
+    );
+  }
 
   const cards = [
     { icon: Gauge, label: "Accuracy", value: stats.accuracy, decimals: 2, suffix: "%", color: "var(--green)" },
     { icon: Crosshair, label: "Precision", value: stats.precision, decimals: 2, suffix: "%", color: "var(--green)" },
-    { icon: Target, label: "Recall", value: stats.recall, decimals: 2, suffix: "%", color: "var(--yellow)" },
-    { icon: Layers, label: "F1 Score", value: stats.f1, decimals: 1, suffix: "%", color: "var(--green)" },
-    { icon: Database, label: "Dataset Size", value: stats.dataset, sub: "Total URLs", color: "var(--green)" },
+    { icon: Target, label: "Recall", value: stats.recall, decimals: 2, suffix: "%", color: "var(--green)" },
+    { icon: Layers, label: "F1 Score", value: stats.f1, decimals: 2, suffix: "%", color: "var(--green)" },
+    { icon: Database, label: "Dataset Size", value: stats.dataset_size, sub: "Total URLs", color: "var(--green)" },
   ];
 
   const matrix = [
@@ -64,12 +66,12 @@ export default function ModelStats() {
   ];
 
   const info = [
-    ["Algorithm", "Random Forest Classifier"],
-    ["Training Samples", stats.trainSplit.toLocaleString()],
-    ["Test Samples", stats.testSplit.toLocaleString()],
-    ["Features", "13 URL-based features"],
-    ["Trees", "100 estimators"],
-    ["Max Depth", "15"],
+    ["Algorithm", stats.model],
+    ["Training Samples", stats.train_split?.toLocaleString()],
+    ["Test Samples", stats.test_split?.toLocaleString()],
+    ["Features", stats.features],
+    ["Trees", stats.trees],
+    ["Max Depth", stats.max_depth],
   ];
 
   return (
@@ -107,7 +109,6 @@ export default function ModelStats() {
         ))}
       </div>
 
-      {/* Confusion Matrix */}
       <motion.div
         className="chart-container"
         initial={{ opacity: 0, y: 16 }}
@@ -120,10 +121,7 @@ export default function ModelStats() {
             <motion.div
               key={m.label}
               className="confusion-cell"
-              style={{
-                background: `${m.color}1f`,
-                borderColor: m.color
-              }}
+              style={{ background: `${m.color}1f`, borderColor: m.color }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 + i * 0.08, duration: 0.35 }}
@@ -140,7 +138,6 @@ export default function ModelStats() {
         </div>
       </motion.div>
 
-      {/* Model Info */}
       <motion.div
         className="chart-container"
         initial={{ opacity: 0, y: 16 }}

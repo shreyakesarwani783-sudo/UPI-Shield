@@ -2,6 +2,9 @@ from services.heuristic_service import heuristic_score
 from services.whois_service import get_domain_age_days
 from services.feature_extraction import extract_features
 from services.ml_service import predict
+def fallback_explanation(reasons: list[str]) -> str:
+    top_reason = reasons[0] if reasons else "suspicious patterns"
+    return f"This site was flagged mainly because: {top_reason}. Avoid entering any UPI PIN, OTP, or banking details here."
 
 def get_risk_level(score: int) -> str:
     if score <= 15:  return "Safe"
@@ -47,11 +50,12 @@ def compute_risk(url: str) -> dict:
         reasons.append(f"Very new domain — only {age_days} days old!")
     elif age_days != -1 and age_days < 180:
         reasons.append(f"Relatively new domain — {age_days} days old")
-
     # Step 5: Fuse scores
     if ml_result["ml_available"]:
         if any("typosquat" in r.lower() for r in reasons):
-            final_score = h_score  # typosquat pe heuristic dominant
+            final_score = h_score
+        elif h_score == 0:
+            final_score = int(0.35 * ml_score)
         else:
             final_score = int(0.6 * ml_score + 0.4 * h_score)
     else:

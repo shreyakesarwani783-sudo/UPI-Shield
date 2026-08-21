@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 node_modules/
 dist/
+backend/ml/dataset/
+backend/ml/model.pkl
+*.pkl

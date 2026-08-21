@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.risk_engine import compute_risk
+from services.risk_engine import compute_risk, fallback_explanation
 from services.xai_service import get_explanation
 from services.history_service import save_scan
 
@@ -28,6 +28,9 @@ def scan_url(request: ScanRequest):
         reasons=result["reasons"],
         risk_level=result["level"]
     )
+
+    if not explanation and result["level"] != "Safe":
+        explanation = fallback_explanation(result["reasons"])
 
     # Step 3: Save to history
     save_scan(
